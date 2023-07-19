@@ -20,7 +20,7 @@ namespace UserRegistrationLoginJWTToken.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register (UserDto request)
+        public async Task<ActionResult<User>> Register ([FromBody] UserDto request)
         {
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -32,7 +32,7 @@ namespace UserRegistrationLoginJWTToken.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login (UserDto request)
+        public async Task<ActionResult<string>> Login ([FromBody] UserDto request)
         {
             if (user.Login != request.Login)
             {
@@ -53,11 +53,12 @@ namespace UserRegistrationLoginJWTToken.Controllers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Login)
+                new Claim(ClaimTypes.Name, user.Login),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value.PadRight(64,'k')));
+                Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
